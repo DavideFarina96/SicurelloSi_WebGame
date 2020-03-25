@@ -570,6 +570,7 @@ function Sound(source, volume, loop) {
         this.son.setAttribute("hidden", "true");
         this.son.setAttribute("volume", this.volume);
         this.son.setAttribute("autostart", "true");
+        this.son.setAttribute("style", "display:none");
         this.son.setAttribute("loop", this.loop);
         document.body.appendChild(this.son);
     }

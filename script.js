@@ -10,14 +10,14 @@ var spawn_time = 2000;
 var lose_position = 75;
 
 var loaded_assets = 0;
-var total_assets = 40;
+var total_assets = 41;
 var game_state = "menu";
 var current_level = 0;
 
 //starting and ending sprite IDs for prizes and obstacles, based on current level
-var levels = [  {speed: 0.6, start_prize: 0, end_prize: 4, start_obstacle: 0, end_obstacle: 5},
-                {speed: 0.8, start_prize: 5, end_prize: 9, start_obstacle: 6, end_obstacle: 11},
-                {speed: 1.0, start_prize: 10, end_prize: 13, start_obstacle: 12, end_obstacle: 17}
+var levels = [  {speed: 0.6, next_level_score: 250, start_prize: 0, end_prize: 4, start_obstacle: 0, end_obstacle: 5},
+                {speed: 0.8, next_level_score: 600, start_prize: 5, end_prize: 9, start_obstacle: 6, end_obstacle: 11},
+                {speed: 1.0, next_level_score: 100000, start_prize: 10, end_prize: 13, start_obstacle: 12, end_obstacle: 17}
             ];
 
 // Game objects
@@ -29,7 +29,7 @@ var player = {
     record: 0
 };
 
-var map_coords = { //coords are in % of width and height, from top left
+var map_coords = { //coords are in % of width and height, from top left 
     char_in_lanes: [{ x: 10, y: 80 },
     { x: 37, y: 80 },
     { x: 67, y: 80 }],
@@ -48,6 +48,7 @@ var prize_sprites = [];
 var clouds = [];
 var cloud_sprite;
 var level_message_sprite;
+var logo_sprite;
 
 var objects = [];
 
@@ -72,7 +73,6 @@ var new_level_message_is_present = false;
 // ---------------------------
 /*
     TODO:
-    - Change level thresholds (100 and 300) to something else
     - Remove console logs
     - Usa le frecce per spostarti
 */
@@ -236,6 +236,12 @@ function load_sprites() {
     level_message_sprite.onload = function () {
         loaded_assets++;
     }
+
+    logo_sprite = new Image();
+    logo_sprite.src = "images/Scritta.png";
+    logo_sprite.onload = function () {
+        loaded_assets++;
+    }
 }
 
 // Helper resize + draw
@@ -255,12 +261,13 @@ function resize_canvas() {
 function draw_main_menu() {
     context.drawImage(map_sprite, 0, 0, canvas.width, canvas.height);
     context.drawImage(menu_sprite, canvas.width * 0.15, canvas.height * 0.35, canvas.width * 0.7, canvas.height * 0.6);
+    context.drawImage(logo_sprite, canvas.width * 0.2, canvas.height * 0.4, canvas.width * 0.6, canvas.height * 0.07);
     var fontSize = 37 * size_mult;
     context.font = fontSize + "pt SicurelloFont";
     context.fillStyle = "#000000";
     context.textAlign = "center";
-    context.fillText("aiuta", (canvas.width / 100) * 50, (canvas.height / 100) * 45);
-    context.fillText("Sicurello!", (canvas.width / 100) * 50, (canvas.height / 100) * 52);
+    context.fillText("aiuta", (canvas.width / 100) * 50, (canvas.height / 100) * 57);
+    context.fillText("Sicurello!", (canvas.width / 100) * 50, (canvas.height / 100) * 64);
     fontSize = 32 * size_mult;
     context.font = fontSize + "pt SicurelloFont";
     context.fillText("Record: " + player.record, (canvas.width / 100) * 50, (canvas.height / 100) * 74);
@@ -414,14 +421,14 @@ function spawn_object(type, sprite, lane) {
 function move_down_objects() {
     // speed up for next levels
 
-    if(player.score >= 300 && current_level == 1) //do just once
+    if(player.score >= levels[current_level].next_level_score && current_level == 1) //Go to level 2: do just once
     {
         current_level = 2;
         movement_speed = levels[current_level].speed;
         new_level_message_is_present = true;
         new_level_message_timer = setTimeout(function() { new_level_message_is_present = false; clearTimeout(new_level_message_timer) }, 1000);
     }
-    else if(player.score >= 100 && current_level == 0) //do just once
+    else if(player.score >= levels[current_level].next_level_score && current_level == 0) //Go to level 1: do just once
     {
         current_level = 1;
         movement_speed = levels[current_level].speed;

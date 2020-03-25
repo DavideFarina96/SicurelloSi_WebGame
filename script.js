@@ -66,7 +66,9 @@ var error_sound;
 // Clocks and timers
 var frame_clock;
 var spawn_clock;
-var check_loaded;
+var check_loaded_timer;
+var use_arrows_message_timer;
+var use_arrows_message_is_present = false;
 var new_level_message_timer;
 var new_level_message_is_present = false;
 
@@ -135,6 +137,8 @@ function start_new_game() {
     draw_frame(true);
 
     spawn_clock = setInterval(spawn_next_wave, spawn_time);
+    use_arrows_message_is_present = true;
+    use_arrows_message_timer = setTimeout(function(){ use_arrows_message_is_present = false; clearTimeout(use_arrows_message_timer)}, 2000);
     game_state = "playing";
     success_sound.start();
 }
@@ -299,6 +303,17 @@ function draw_instructions() {
     context.fillText("Inizia", (canvas.width / 100) * 50, (canvas.height / 100) * 91.5);
 }
 
+function draw_use_arrows_message()
+{
+    context.drawImage(level_message_sprite, canvas.width * 0.15, canvas.height * 0.28, canvas.width * 0.7, canvas.height * 0.16);
+    context.textAlign = "center";
+    context.fillStyle = "#000000";
+    fontSize = 30 * size_mult;
+    context.font = fontSize + "pt SicurelloFont";
+    context.fillText("Usa le frecce", (canvas.width / 100) * 50, (canvas.height / 100) * 35); 
+    context.fillText("Per spostarti", (canvas.width / 100) * 50, (canvas.height / 100) * 40); 
+}
+
 function draw_game_over() {
     context.drawImage(map_sprite, 0, 0, canvas.width, canvas.height);
     context.drawImage(gameover_sprite, canvas.width * 0.15, canvas.height * 0.25, canvas.width * 0.7, canvas.height * 0.7);
@@ -377,6 +392,8 @@ function draw_frame(refresh_size) {
     }
     if(new_level_message_is_present)
         draw_new_level_message()
+    if(use_arrows_message_is_present)
+        draw_use_arrows_message()
     draw_clouds();
 }
 

@@ -15,9 +15,9 @@ var game_state = "menu";
 var current_level = 0;
 
 //starting and ending sprite IDs for prizes and obstacles, based on current level
-var levels = [  {speed: 0.6, next_level_score: 250, start_prize: 0, end_prize: 4, start_obstacle: 0, end_obstacle: 5},
-                {speed: 0.8, next_level_score: 600, start_prize: 5, end_prize: 9, start_obstacle: 6, end_obstacle: 11},
-                {speed: 1.0, next_level_score: 100000, start_prize: 10, end_prize: 13, start_obstacle: 12, end_obstacle: 17}
+var levels = [  {speed: 0.6, next_level_score: 250, spawn_time: 2000, start_prize: 0, end_prize: 4, start_obstacle: 0, end_obstacle: 5},
+                {speed: 0.8, next_level_score: 600, spawn_time: 1700, start_prize: 5, end_prize: 9, start_obstacle: 6, end_obstacle: 11},
+                {speed: 1.0, next_level_score: 100000, spawn_time: 1400, start_prize: 10, end_prize: 13, start_obstacle: 12, end_obstacle: 17}
             ];
 
 // Game objects
@@ -75,14 +75,12 @@ var new_level_message_is_present = false;
 // ---------------------------
 /*
     TODO:
-    - Remove console logs
-    - Usa le frecce per spostarti
 */
 
 // Event Listeners
 document.addEventListener('keydown', function (event) {
     const key = event.key; // "a", "1", "Shift", etc.
-    console.log(key);
+    //console.log(key);
 
     if (key == "ArrowRight" && player.lane < 2)
         player.lane++;
@@ -102,7 +100,7 @@ function main() {
     init_canvas();
     load_sprites();
     var record = document.cookie
-    console.log("new rec: " + record)
+    //console.log("new rec: " + record)
     if(record > player.record)
         player.record = record;
 
@@ -136,10 +134,6 @@ function start_new_game() {
     setup_game();
     draw_frame(true);
 
-    spawn_clock = setInterval(spawn_next_wave, spawn_time);
-    use_arrows_message_is_present = true;
-    use_arrows_message_timer = setTimeout(function(){ use_arrows_message_is_present = false; clearTimeout(use_arrows_message_timer)}, 2000);
-    game_state = "playing";
     success_sound.start();
 }
 
@@ -157,6 +151,11 @@ function setup_game() {
     player.selected_char = 1;
     player.lane = 1;
     player.score = 0;
+
+    spawn_clock = setInterval(spawn_next_wave, levels[current_level].spawn_time);
+    use_arrows_message_is_present = true;
+    use_arrows_message_timer = setTimeout(function(){ use_arrows_message_is_present = false; clearTimeout(use_arrows_message_timer)}, 2000);
+    game_state = "playing";
 }
 
 function load_sprites() {
@@ -441,6 +440,8 @@ function move_down_objects() {
     if(player.score >= levels[current_level].next_level_score && current_level == 1) //Go to level 2: do just once
     {
         current_level = 2;
+        clearInterval(spawn_clock);
+        spawn_clock = setInterval(spawn_next_wave, levels[current_level].spawn_time);
         movement_speed = levels[current_level].speed;
         new_level_message_is_present = true;
         new_level_message_timer = setTimeout(function() { new_level_message_is_present = false; clearTimeout(new_level_message_timer) }, 1000);
@@ -448,6 +449,8 @@ function move_down_objects() {
     else if(player.score >= levels[current_level].next_level_score && current_level == 0) //Go to level 1: do just once
     {
         current_level = 1;
+        clearInterval(spawn_clock);
+        spawn_clock = setInterval(spawn_next_wave, levels[current_level].spawn_time);
         movement_speed = levels[current_level].speed;
         new_level_message_is_present = true;
         new_level_message_timer = setTimeout(function() { new_level_message_is_present = false; clearTimeout(new_level_message_timer) }, 1000);
@@ -465,7 +468,7 @@ function move_down_objects() {
         if (objects[i].y > lose_position && objects[i].lane == player.lane) {
             if (objects[i].type == "obstacle") {
                 error_sound.start();
-                console.log("lost " + i)
+                //console.log("lost " + i)
                 player.lifes--;
                 if (player.lifes == 0) {
                     game_over();
@@ -520,13 +523,13 @@ function spawn_next_wave() {
 }
 
 function game_over() {
-    console.log(player.score)
-    console.log(player.record)
+    //console.log(player.score)
+    //console.log(player.record)
     if(player.score > player.record)
     {
         player.record = player.score;
         document.cookie = player.score + "; expires=Tue, 31 Dec 2030 12:00:00 UTC";
-        console.log("new rec: " + document.cookie)
+        //console.log("new rec: " + document.cookie)
     }
 
     game_state = "gameover";

@@ -16,8 +16,8 @@ var current_level = 0;
 
 //starting and ending sprite IDs for prizes and obstacles, based on current level
 var levels = [  {speed: 0.6, next_level_score: 250, spawn_time: 2000, start_prize: 0, end_prize: 4, start_obstacle: 0, end_obstacle: 5},
-                {speed: 0.8, next_level_score: 600, spawn_time: 1700, start_prize: 5, end_prize: 9, start_obstacle: 6, end_obstacle: 11},
-                {speed: 1.0, next_level_score: 100000, spawn_time: 1400, start_prize: 10, end_prize: 13, start_obstacle: 12, end_obstacle: 17}
+                {speed: 0.8, next_level_score: 600, spawn_time: 1600, start_prize: 5, end_prize: 9, start_obstacle: 6, end_obstacle: 11},
+                {speed: 1.0, next_level_score: 100000, spawn_time: 1300, start_prize: 10, end_prize: 13, start_obstacle: 12, end_obstacle: 17}
             ];
 
 // Game objects
@@ -287,8 +287,8 @@ function draw_instructions() {
     context.fillStyle = "#000000";
     context.textAlign = "center";
     context.fillText("Aiuta sicurello a:", (canvas.width / 100) * 50, (canvas.height / 100) * 31);
-    context.fillText("Raccogliere gli", (canvas.width / 100) * 50, (canvas.height / 100) * 43);
-    context.fillText("strumenti", (canvas.width / 100) * 50, (canvas.height / 100) * 48);
+    context.fillText("Raccogliere", (canvas.width / 100) * 50, (canvas.height / 100) * 43);
+    context.fillText("i dpi", (canvas.width / 100) * 50, (canvas.height / 100) * 48);
     context.fillText("Evitare i virus", (canvas.width / 100) * 50, (canvas.height / 100) * 60);
     context.fillText("Gestire", (canvas.width / 100) * 50, (canvas.height / 100) * 72);
     context.fillText("l'emergenza", (canvas.width / 100) * 50, (canvas.height / 100) * 77);
@@ -437,7 +437,11 @@ function spawn_object(type, sprite, lane) {
 function move_down_objects() {
     // speed up for next levels
 
-    if(player.score >= levels[current_level].next_level_score && current_level == 1) //Go to level 2: do just once
+    if(player.score >= 1000) //keep increasing speed
+    {
+        movement_speed = levels[2].speed + (player.score - 1000)/1000;
+    }
+    else if(player.score >= levels[current_level].next_level_score && current_level == 1) //Go to level 2: do just once
     {
         current_level = 2;
         clearInterval(spawn_clock);

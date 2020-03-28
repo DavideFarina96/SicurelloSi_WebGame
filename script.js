@@ -1,6 +1,8 @@
 var canvas;
 var context;
 
+var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+
 // Game parameters
 var size_mult = 1;
 var framerate = 60;
@@ -58,6 +60,18 @@ var ok_area = {
     width: 0.7,
     height: 0.15
 }
+var left_part_of_screen = {
+    x: 0,
+    y: 0,
+    width: 0.5,
+    height: 1
+}
+var right_part_of_screen = {
+    x: 0.5,
+    y: 0,
+    width: 0.5,
+    height: 1
+}
 
 // Sounds
 var success_sound;
@@ -105,15 +119,22 @@ function main() {
         player.record = record;
 
     // Click Listener
-    canvas.addEventListener('click', (e) => {
+    canvas.addEventListener('mousedown', (e) => {
         var rect = canvas.getBoundingClientRect();
         const mouse_pos = {
             x: (e.clientX - rect.x) / canvas.width,
             y: (e.clientY - rect.y) / canvas.height
         };
-        if (isIntersect(mouse_pos, ok_area)) {
+        if (isIntersect(mouse_pos, ok_area) && game_state != "playing") {
             restart_game();
         }
+        if(isIntersect(mouse_pos, left_part_of_screen) && game_state == "playing" && player.lane > 0){
+            player.lane--;
+        }
+        if(isIntersect(mouse_pos, right_part_of_screen) && game_state == "playing" && player.lane < 2){
+            player.lane++;
+        }
+
     
     });
 
@@ -131,9 +152,9 @@ function main() {
 }
 
 function start_new_game() {
+
     setup_game();
     draw_frame(true);
-
     success_sound.start();
 }
 
@@ -250,14 +271,32 @@ function load_sprites() {
 // Helper resize + draw
 function resize_canvas() {
     if (height != window.innerHeight || width != height / 1.5) {
-        var height = window.innerHeight;
-        var width = height / 1.5;
-        size_mult = height / 900;
-
-        canvas.style.width = height.toString() + "px";
-        canvas.style.width = width.toString() + "px";
-        canvas.height = height;
-        canvas.width = width
+        if(window.innerHeight / 1.5 > window.innerWidth) //mobile or narrow window
+        {
+            var width = window.innerWidth;
+            var height = width * 1.5;
+            size_mult = height / 900;
+    
+            canvas.style.width = height.toString() + "px";
+            canvas.style.width = width.toString() + "px";
+            canvas.height = height;
+            canvas.width = width
+            canvas.style.marginTop = window.innerHeight - height + "px"
+            document.body.style.backgroundColor = "#2EAADC";
+        }
+        else //normal screen
+        {
+            var height = window.innerHeight;
+            var width = height / 1.5;
+            size_mult = height / 900;
+    
+            canvas.style.width = height.toString() + "px";
+            canvas.style.width = width.toString() + "px";
+            canvas.height = height;
+            canvas.width = width
+            canvas.style.marginTop = "0px";
+            document.body.style.backgroundColor = "#ffffff";
+        }
     }
 }
 
@@ -570,7 +609,8 @@ function Sound(source, volume, loop) {
         this.son.setAttribute("hidden", "true");
         this.son.setAttribute("volume", this.volume);
         this.son.setAttribute("autostart", "true");
-        this.son.setAttribute("style", "display:none");
+        if(!isChrome)
+            this.son.setAttribute("style", "display:none");
         this.son.setAttribute("loop", this.loop);
         document.body.appendChild(this.son);
     }
